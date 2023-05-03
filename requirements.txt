@@ -1,0 +1,4 @@
+blacksheep~=1.2.14
+uvicorn~=0.22.0
+aiofiles~=23.1.0
+httpx~=0.24.0

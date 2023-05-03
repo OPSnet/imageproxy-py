@@ -1,0 +1,17 @@
+[Unit]
+Description=imageproxy-py image fetcher
+After=nginx.service
+
+[Service]
+User=imageproxy
+Group=imageproxy
+WorkingDirectory=/data/imageproxy-py
+ExecStart=/data/imageproxy-py/venv/bin/uvicorn \
+    --no-access-log --port 8091 main:app
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s TERM $MAINPID
+PrivateTmp=true
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
