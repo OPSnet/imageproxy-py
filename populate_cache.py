@@ -10,7 +10,7 @@ from main import create_filename, requester
 
 
 async def download(base_dir: str, url: str):
-    img_url = urlsafe_b64encode(url.encode('ascii'))
+    img_url = urlsafe_b64encode(url.encode('ascii')).rstrip(b'=')
     file_path = path_join(base_dir, create_filename(img_url).decode('ascii'))
     if await path.isfile(file_path):
         return
