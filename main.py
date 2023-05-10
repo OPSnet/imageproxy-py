@@ -88,10 +88,10 @@ def parse_imgproxy_params(params: str) -> list[bytes]:
     return opts
 
 
-def create_filename(img_url: bytes) -> bytes:
+def create_filename(bucket: bytes, img_url: bytes) -> bytes:
     img_url_hash = sha224(img_url).digest()
     hash_b64 = urlsafe_b64encode(img_url_hash)
-    return hash_b64[0:1] + b'/' + hash_b64[1:2] + b'/' + hash_b64
+    return bucket + b'/' + hash_b64[0:1] + b'/' + hash_b64[1:2] + b'/' + hash_b64
 
 
 requester = ImgproxyDownloader(IMGPROXY_URL)
@@ -113,17 +113,19 @@ async def download_file(img_url: str, file_path: str, requester=requester):
 validator = SignatureValidator(SIG_SECRET)
 
 
-@app.router.get("/i/*")
+@app.router.get("/*")
 async def handle_signed_request(request: Request) -> Response:
     # check path
     url = request.route_values['tail'].split('/')
-    if len(url) not in [3, 4]:
+    if len(url) not in (4, 5):
         logger.debug("wrong number of path elements: %d", len(url))
         return bad_request()
 
+    bucket = url.pop(0).encode('ascii')
+
     img_url = url[2].encode('ascii')
-    sig_msg = img_url
-    if len(url) == 4:
+    sig_msg = bucket + b'/' + img_url
+    if len(url) == 5:
         sig_msg += b'/' + url[3].encode('ascii')
 
     # validate signature
@@ -150,7 +152,7 @@ async def handle_signed_request(request: Request) -> Response:
 
     is_resize = bool(imgproxy_opts)
 
-    img_path = create_filename(img_url)
+    img_path = create_filename(bucket, img_url)
     imgproxy_opts.append(b'fn:' + img_url)
 
     # download and perma-store image through imgproxy
