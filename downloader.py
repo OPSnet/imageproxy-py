@@ -36,7 +36,7 @@ class ImgproxyDownloader:
 
     @classmethod
     def _get_full_path(cls, img_url: str) -> str:
-        return cls.DEFAULT_OPTS + '/' + img_url
+        return 'nosig/' + cls.DEFAULT_OPTS + '/' + img_url
 
     @classmethod
     async def read_headers(cls, file_path: str) -> Mapping[str, str]:
